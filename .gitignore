@@ -1,4 +1,5 @@
 .env
+bin/
 data/
 *.db
 node_modules/

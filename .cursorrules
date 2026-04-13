@@ -37,6 +37,7 @@ An autonomous dropshipping marketing agent that:
 cmd/
   agent/main.go          — entrypoint
   scrape-minea/main.go   — one-shot scraper CLI for debugging
+  smoke-test/main.go     — DEV_MODE integration smoke (health, API, WS, chat)
 internal/
   agent/
     agent.go             — main agent loop (phases: discover, reason, approve, launch, monitor, learn)
@@ -57,7 +58,7 @@ internal/
     models.go            — all data structs
 config/
   config.go
-frontend/               — Vue 3 + Vite app
+frontend/               — Vue 3 + Vite app (router, useApi, useWebSocket, views, components)
 
 ## KEY BUSINESS RULES (the agent must know these)
 - Winning product price range: €15–€80 (impulse buy zone)
@@ -107,10 +108,15 @@ frontend/               — Vue 3 + Vite app
 [x] Step 6: Minea scraper
 [x] Step 7: Sup + Meta + TikTok clients
 [x] Step 8: Agent loop
-[ ] Step 9: HTTP API + WebSocket
-[ ] Step 10: Vue frontend
-[ ] Step 11: Wire up + smoke test
+[x] Step 9: HTTP API + WebSocket
+[x] Step 10: Wire up + smoke test
+[x] Step 11: Vue frontend
 
 ## HOW TO UPDATE STATUS
 After completing each step, update the checklist above by changing [ ] to [x].
 This keeps Cursor oriented even in long sessions.
+
+## CHANGELOG POLICY
+- Keep `CHANGELOG.md` up to date for every completed step and meaningful feature change.
+- Add entries under `## Unreleased` grouped by category (`Added`, `Changed`, `Fixed`, `Removed`).
+- Update the changelog in the same change set where implementation is done; never postpone it.

@@ -68,6 +68,9 @@ func New(cfg *config.Config, storeDB *store.Store, reasoner openai.Reasoner,
 func (a *Agent) Outbox() <-chan Message                { return a.outbox }
 func (a *Agent) ApprovalChan() chan<- ApprovalResponse { return a.approval }
 
+// Approvals exposes the receive side of the approval channel (e.g. for API tests).
+func (a *Agent) Approvals() <-chan ApprovalResponse { return a.approval }
+
 func (a *Agent) Run(ctx context.Context) {
 	_ = a.runCycle(ctx)
 	interval := time.Duration(a.cfg.AgentIntervalHours) * time.Hour

@@ -23,4 +23,10 @@ dev:
 create-data-dir:
 	mkdir -p data
 
-.PHONY: test test-integration lint build dev dev-backend dev-frontend create-data-dir
+smoke-test:
+	DEV_MODE=true go run ./cmd/smoke-test
+
+full-test:
+	$(MAKE) test && $(MAKE) smoke-test
+
+.PHONY: test test-integration lint build dev dev-backend dev-frontend create-data-dir smoke-test full-test
