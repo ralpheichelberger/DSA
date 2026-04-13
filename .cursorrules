@@ -1,0 +1,116 @@
+# AI DROPSHIPPING AGENT — PROJECT RULES
+# Cursor reads this file automatically. Never ignore it.
+
+## WHAT WE ARE BUILDING
+An autonomous dropshipping marketing agent that:
+1. Discovers trending products (via Minea scraper using Rod/headless Chrome)
+2. Evaluates margins and supplier data (via Sup Dropshipping API)
+3. Reasons about which products to test (via OpenAI gpt-4o)
+4. Launches and monitors ad campaigns (via Meta Ads API, TikTok Ads API)
+5. Learns from every outcome and stores lessons (SQLite memory layer)
+6. Communicates with the owner via WebSocket + Vue dashboard
+
+## STACK
+- Backend: Go 1.22+, Chi router, gorilla/websocket, go-rod (scraper), go-sqlite3
+- AI: OpenAI API (gpt-4o) via github.com/sashabaranov/go-openai
+- Frontend: Vue 3 + Vite (in /frontend directory)
+- Database: SQLite at ./data/agent.db
+- Config: environment variables loaded from .env
+
+## EXISTING RESOURCES (owner already has these)
+- Minea Basic account (email/password login, no public API — we scrape via Rod)
+- Two Shopify stores: one for tech accessories, one for pet products
+- OpenAI API key (gpt-4o)
+- Cursor Pro
+- Meta Business account (API app review pending — stubs used until approved)
+
+## TDD RULES — NON-NEGOTIABLE
+1. Write the test file FIRST. The test must fail before implementation begins.
+2. Every exported function and method must have at least one test.
+3. Use table-driven tests for all logic with multiple cases.
+4. Use interfaces for all external dependencies so they can be mocked in tests.
+5. Run `go test ./...` after every implementation step. All tests must pass before moving on.
+6. Integration tests (hitting real network) go in files tagged `//go:build integration`
+7. No "we'll add tests later". If you find yourself writing that, stop and write the test first.
+
+## PROJECT STRUCTURE
+cmd/
+  agent/main.go          — entrypoint
+  scrape-minea/main.go   — one-shot scraper CLI for debugging
+internal/
+  agent/
+    agent.go             — main agent loop (phases: discover, reason, approve, launch, monitor, learn)
+    knowledge.go         — AgentKnowledgeCore constant (dropshipping expertise baked in)
+    memory.go            — learning/memory layer
+    decision.go          — product scoring + campaign decision engine
+  integrations/
+    openai/client.go     — gpt-4o reasoning client
+    minea/scraper.go     — Rod-based headless scraper
+    sup/client.go        — Sup Dropshipping API
+    meta/client.go       — Meta Ads API
+    tiktok/client.go     — TikTok Ads API
+  api/
+    server.go            — HTTP + WebSocket server
+    handlers.go
+  store/
+    db.go                — SQLite setup and migrations
+    models.go            — all data structs
+config/
+  config.go
+frontend/               — Vue 3 + Vite app
+
+## KEY BUSINESS RULES (the agent must know these)
+- Winning product price range: €15–€80 (impulse buy zone)
+- Minimum viable gross margin: 30% (below this = structurally unprofitable with paid ads)
+- BEROAS formula: 100 / GrossMargin%. Example: 30% margin → BEROAS = 3.33
+- Scale threshold: actual ROAS must be ≥ BEROAS × 1.25 before scaling budget
+- Kill threshold: pause if spend > 50% of per-unit gross profit with zero purchases
+- Kill threshold: pause if CPA > (selling price - COGS) after 3 days
+- TikTok role: DISCOVERY (top-funnel, cheap CPMs €2.60-6.60, UGC-style creative)
+- Meta role: CONVERSION (closing + retargeting, median ROAS 2.2x, Advantage+ campaigns)
+- Creative refresh: every 2-3 weeks on TikTok, monthly on Meta
+- Product saturation signal: trending heavily for >6 weeks = likely past peak
+
+## OWNER NOTIFICATION RULES
+- Severity levels (lowest to highest): "info" | "warning" | "critical"
+- NOTIFY_MIN_SEVERITY controls which events trigger out-of-band delivery
+- Default min severity is "critical" — only critical events leave the dashboard
+- Critical events that ALWAYS notify out-of-band regardless of dashboard state:
+    * Credit balance below minimum safe threshold (< 100 credits)
+    * Credit quota exhausted for current session
+    * Auth token expired and re-login failed
+    * No communication channels configured (log warning once on startup)
+    * Campaign auto-killed with spend > €50
+    * Agent cycle failed 3 consecutive times
+- Warning events (notify if NOTIFY_MIN_SEVERITY=warning or lower):
+    * Credit balance below alert threshold (< 200 credits)
+    * Campaign CPA trending toward kill threshold
+    * Approval request pending > 12 hours
+- Info events (notify if NOTIFY_MIN_SEVERITY=info):
+    * Daily performance summary
+    * New product approved for testing
+    * Lesson learned and saved
+- If NO notification channels are configured in .env:
+    * Log a warning on startup: "No notification channels configured —
+      critical alerts will only appear in the dashboard"
+    * Send a dashboard Message of type "alert" as fallback
+    * Never panic or fail — degraded mode is acceptable
+
+## CURRENT BUILD STATUS
+[x] Step 1: Scaffold + test infrastructure
+[x] Step 2: Store / database layer
+[x] Step 3: Domain models + decision engine
+[x] Step 3a: Knowledge base (AgentKnowledgeCore)
+[x] Step 4: OpenAI client
+[x] Step 5: Integration interfaces + stubs
+[x] Step 5a: Notify package (owner communication)
+[x] Step 6: Minea scraper
+[x] Step 7: Sup + Meta + TikTok clients
+[x] Step 8: Agent loop
+[ ] Step 9: HTTP API + WebSocket
+[ ] Step 10: Vue frontend
+[ ] Step 11: Wire up + smoke test
+
+## HOW TO UPDATE STATUS
+After completing each step, update the checklist above by changing [ ] to [x].
+This keeps Cursor oriented even in long sessions.
