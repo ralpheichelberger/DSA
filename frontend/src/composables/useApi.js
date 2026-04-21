@@ -10,10 +10,23 @@ function pick(obj, camel, pascal) {
   return undefined
 }
 
+/** Best outbound URL for a row: landing page, then shop, then platform ad link. */
+export function primaryProductLink(p) {
+  if (!p) return ''
+  const land = String(p.landingURL || '').trim()
+  const shop = String(p.shopURL || '').trim()
+  const ad = String(p.adURL || '').trim()
+  return land || shop || ad
+}
+
 export function normalizeProduct(p) {
   return {
     id: pick(p, 'id', 'ID') ?? '',
     productName: pick(p, 'productName', 'ProductName') ?? '',
+    productImageURL: pick(p, 'productImageURL', 'ProductImageURL') ?? '',
+    adURL: pick(p, 'adURL', 'AdURL') ?? '',
+    shopURL: pick(p, 'shopURL', 'ShopURL') ?? '',
+    landingURL: pick(p, 'landingURL', 'LandingURL') ?? '',
     niche: pick(p, 'niche', 'Niche') ?? '',
     shopifyStore: pick(p, 'shopifyStore', 'ShopifyStore') ?? '',
     sourcePlatform: pick(p, 'sourcePlatform', 'SourcePlatform') ?? '',
@@ -64,18 +77,49 @@ export function normalizeLesson(l) {
   }
 }
 
+export function normalizeMineaCandidate(p) {
+  return {
+    id: pick(p, 'id', 'ID') ?? '',
+    name: pick(p, 'name', 'Name') ?? '',
+    niche: pick(p, 'niche', 'Niche') ?? '',
+    shopifyStore: pick(p, 'shopifyStore', 'ShopifyStore') ?? '',
+    imageURL: pick(p, 'imageURL', 'ImageURL') ?? '',
+    adURL: pick(p, 'adURL', 'AdURL') ?? '',
+    shopURL: pick(p, 'shopURL', 'ShopURL') ?? '',
+    landingURL: pick(p, 'landingURL', 'LandingURL') ?? '',
+    supplierID: pick(p, 'supplierID', 'SupplierID') ?? '',
+    activeAdCount: Number(pick(p, 'activeAdCount', 'ActiveAdCount') ?? 0),
+    engagementScore: Number(pick(p, 'engagementScore', 'EngagementScore') ?? 0),
+    estimatedSellEur: Number(pick(p, 'estimatedSellEur', 'EstimatedSellEur') ?? 0),
+    platforms: pick(p, 'platforms', 'Platforms') ?? [],
+  }
+}
+
 export function useApi() {
   const products = reactive({ data: [], error: null, loading: false })
+  const scraped = reactive({ data: [], error: null, loading: false })
   const campaigns = reactive({ data: [], error: null, loading: false })
   const lessons = reactive({ data: [], error: null, loading: false })
   const approval = reactive({ data: null, error: null, loading: false })
   const chat = reactive({ data: null, error: null, loading: false })
+  const mineaSearch = reactive({ data: [], error: null, loading: false })
 
-  async function getProducts(status) {
+  /**
+   * @param {string | { status?: string, view?: 'all' | 'winners' }} [filters]
+   *   Legacy: pass a string status. Prefer `{ view: 'winners' }` for the pipeline shortlist.
+   */
+  async function getProducts(filters) {
     products.loading = true
     products.error = null
     try {
-      const q = status ? `?status=${encodeURIComponent(status)}` : ''
+      const params = new URLSearchParams()
+      if (typeof filters === 'string' && filters) {
+        params.set('status', filters)
+      } else if (filters && typeof filters === 'object') {
+        if (filters.status) params.set('status', String(filters.status))
+        if (filters.view) params.set('view', String(filters.view))
+      }
+      const q = params.toString() ? `?${params.toString()}` : ''
       const res = await fetch(`${API_BASE}/api/products${q}`)
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
       const raw = await res.json()
@@ -87,6 +131,24 @@ export function useApi() {
       products.loading = false
     }
     return products
+  }
+
+  async function getMineaScraped(niche) {
+    scraped.loading = true
+    scraped.error = null
+    try {
+      const q = niche ? `?niche=${encodeURIComponent(niche)}` : ''
+      const res = await fetch(`${API_BASE}/api/minea/scraped${q}`)
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
+      const raw = await res.json()
+      scraped.data = Array.isArray(raw) ? raw.map(normalizeProduct) : []
+    } catch (e) {
+      scraped.error = e.message || String(e)
+      scraped.data = []
+    } finally {
+      scraped.loading = false
+    }
+    return scraped
   }
 
   async function getCampaigns() {
@@ -168,16 +230,41 @@ export function useApi() {
     return chat
   }
 
+  async function runMineaSearch(filters = {}) {
+    mineaSearch.loading = true
+    mineaSearch.error = null
+    try {
+      const res = await fetch(`${API_BASE}/api/minea/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filters),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const raw = await res.json()
+      mineaSearch.data = Array.isArray(raw) ? raw.map(normalizeMineaCandidate) : []
+    } catch (e) {
+      mineaSearch.error = e.message || String(e)
+      mineaSearch.data = []
+    } finally {
+      mineaSearch.loading = false
+    }
+    return mineaSearch
+  }
+
   return {
     products,
+    scraped,
     campaigns,
     lessons,
     approval,
     chat,
+    mineaSearch,
     getProducts,
+    getMineaScraped,
     getCampaigns,
     getLessons,
     sendApproval,
     sendChat,
+    runMineaSearch,
   }
 }

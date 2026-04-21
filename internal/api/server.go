@@ -26,6 +26,8 @@ type StoreReader interface {
 	GetActiveCampaigns() ([]store.CampaignResult, error)
 	GetAllLessons() ([]store.LearnedLesson, error)
 	BuildMemoryContext() (string, error)
+	GetProductTest(id string) (*store.ProductTest, error)
+	SaveProductTest(pt store.ProductTest) error
 }
 
 // AgentConn is the subset of agent operations used by the HTTP and WebSocket layer.
@@ -129,6 +131,8 @@ func (s *Server) mountRoutes() {
 	s.router.Get("/api/products", s.handleGetProducts)
 	s.router.Get("/api/campaigns", s.handleGetCampaigns)
 	s.router.Get("/api/lessons", s.handleGetLessons)
+	s.router.Get("/api/minea/scraped", s.handleGetMineaScraped)
+	s.router.Post("/api/minea/search", s.handleMineaSearch)
 	s.router.Post("/api/approve", s.handleApprove)
 	s.router.Post("/api/chat", s.handleChat)
 	s.router.Get("/ws", s.handleWebSocket)

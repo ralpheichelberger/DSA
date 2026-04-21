@@ -1,0 +1,21 @@
+Chrome net-export JSON (chrome://net-export/) — top-level fields
+================================================================
+
+log.version
+  Schema version of the NetLog *file* (often "1.2"), not your Chrome
+  browser version. Newer Chrome may still write the same log version.
+
+log.creator
+  Metadata about what wrote the file, e.g.:
+    name: "NetLog"
+    version: matches or relates to the capture tooling
+  Safe to ignore for analysis; use it only to know the capture source.
+
+Where the traffic is
+  The interesting data is usually in the large "events" array (each entry
+  has type, time, source, and params). Search the file for:
+    - hostnames (app.minea.com, etc.)
+    - "url", "method", "headers", "graphql", "login"
+
+Tip: HAR from DevTools (Network → Save all as HAR) is often easier than
+parsing NetLog for HTTP login flows.

@@ -50,6 +50,27 @@ func (m *mockStore) BuildMemoryContext() (string, error) {
 	return m.memory, nil
 }
 
+func (m *mockStore) GetProductTest(id string) (*store.ProductTest, error) {
+	for i := range m.products {
+		if m.products[i].ID == id {
+			p := m.products[i]
+			return &p, nil
+		}
+	}
+	return nil, nil
+}
+
+func (m *mockStore) SaveProductTest(pt store.ProductTest) error {
+	for i := range m.products {
+		if m.products[i].ID == pt.ID {
+			m.products[i] = pt
+			return nil
+		}
+	}
+	m.products = append(m.products, pt)
+	return nil
+}
+
 type mockReasoner struct {
 	reply string
 }

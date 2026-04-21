@@ -14,6 +14,8 @@ provide('agentWs', agentWs)
       <nav class="nav">
         <RouterLink to="/" active-class="link--active">Dashboard</RouterLink>
         <RouterLink to="/products" active-class="link--active">Products</RouterLink>
+        <RouterLink to="/scraped" active-class="link--active">Scraped</RouterLink>
+        <RouterLink to="/minea-search" active-class="link--active">Minea Search</RouterLink>
         <RouterLink to="/campaigns" active-class="link--active">Campaigns</RouterLink>
         <RouterLink to="/chat" active-class="link--active">Chat</RouterLink>
       </nav>

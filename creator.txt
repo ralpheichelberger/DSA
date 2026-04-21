@@ -1,0 +1,16 @@
+Chrome net-export: log.version vs log.creator
+----------------------------------------------
+
+log.version  → NetLog *file format* version (e.g. "1.2"). Not Chrome major version.
+
+log.creator  → Who produced the capture (e.g. name "NetLog", version string).
+               Informational only.
+
+Real traffic → search the big "events"[] for URLs, methods, your hostnames.
+
+For login debugging, DevTools Network + HAR export is usually simpler than NetLog.
+
+This repo can turn a HAR into ./data/minea_session.json:
+  go run ./cmd/import-minea-har "your-export.har"
+
+(Fuller notes: docs/chrome-netlog-creator.txt)

@@ -52,6 +52,8 @@ func main() {
 	_ = os.Setenv("DEV_MODE", "true")
 	_ = os.Setenv("AUTO_APPROVE", "true")
 	_ = os.Setenv("DB_PATH", ":memory:")
+	// Keep Minea offline even if .env has credentials (deterministic smoke test).
+	_ = os.Setenv("MINEA_STUB", "true")
 
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "smoke-test failed: %v\n", err)

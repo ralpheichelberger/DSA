@@ -5,6 +5,10 @@ import "time"
 type ProductTest struct {
 	ID              string
 	ProductName     string
+	ProductImageURL string
+	AdURL           string `json:"adURL"`
+	ShopURL         string `json:"shopURL"`
+	LandingURL      string `json:"landingURL"`
 	Niche           string
 	ShopifyStore    string
 	SourcePlatform  string

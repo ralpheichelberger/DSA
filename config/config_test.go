@@ -35,10 +35,21 @@ func TestDefaults(t *testing.T) {
 	t.Setenv("DEV_MODE", "true")
 	t.Setenv("DB_PATH", "")
 	t.Setenv("PORT", "")
+	t.Setenv("AGENT_DISCOVERY_NICHES", "")
 
 	cfg, err := Load()
 	assert.NoError(t, err)
 	assert.NotNil(t, cfg)
 	assert.Equal(t, "./data/agent.db", cfg.DatabasePath)
 	assert.Equal(t, "8080", cfg.Port)
+	assert.Equal(t, []string{"tech", "pets"}, cfg.DiscoveryNiches)
+}
+
+func TestLoad_DiscoveryNichesCustom(t *testing.T) {
+	t.Setenv("DEV_MODE", "true")
+	t.Setenv("AGENT_DISCOVERY_NICHES", " pets , home ")
+
+	cfg, err := Load()
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"pets", "home"}, cfg.DiscoveryNiches)
 }

@@ -36,6 +36,10 @@ func TestSaveAndGetProductTest(t *testing.T) {
 	product := ProductTest{
 		ID:              "pt-1",
 		ProductName:     "Magnetic Cable",
+		ProductImageURL: "https://img.example.com/magnetic-cable.jpg",
+		AdURL:           "https://www.facebook.com/ads/library/?id=1",
+		ShopURL:         "https://store.example.com",
+		LandingURL:      "https://store.example.com/products/cable",
 		Niche:           "tech",
 		ShopifyStore:    "tech",
 		SourcePlatform:  "minea",
@@ -67,6 +71,10 @@ func TestSaveAndGetProductTest(t *testing.T) {
 			require.NotNil(t, got)
 			assert.Equal(t, product.ID, got.ID)
 			assert.Equal(t, product.ProductName, got.ProductName)
+			assert.Equal(t, product.ProductImageURL, got.ProductImageURL)
+			assert.Equal(t, product.AdURL, got.AdURL)
+			assert.Equal(t, product.ShopURL, got.ShopURL)
+			assert.Equal(t, product.LandingURL, got.LandingURL)
 			assert.Equal(t, product.Niche, got.Niche)
 			assert.Equal(t, product.ShopifyStore, got.ShopifyStore)
 			assert.Equal(t, product.SourcePlatform, got.SourcePlatform)

@@ -38,6 +38,7 @@ func (s *Store) Migrate() error {
 		`CREATE TABLE IF NOT EXISTS product_tests (
 			id TEXT PRIMARY KEY,
 			product_name TEXT NOT NULL,
+			product_image_url TEXT NOT NULL DEFAULT '',
 			niche TEXT NOT NULL,
 			shopify_store TEXT NOT NULL,
 			source_platform TEXT NOT NULL,
@@ -103,6 +104,18 @@ func (s *Store) Migrate() error {
 			return err
 		}
 	}
+	if _, err := s.db.Exec(`ALTER TABLE product_tests ADD COLUMN product_image_url TEXT NOT NULL DEFAULT ''`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return err
+		}
+	}
+	for _, col := range []string{"ad_url", "shop_url", "landing_url"} {
+		if _, err := s.db.Exec(fmt.Sprintf(`ALTER TABLE product_tests ADD COLUMN %s TEXT NOT NULL DEFAULT ''`, col)); err != nil {
+			if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+				return err
+			}
+		}
+	}
 
 	return nil
 }
@@ -114,10 +127,30 @@ func (s *Store) Close() error {
 func (s *Store) SaveProductTest(pt ProductTest) error {
 	_, err := s.db.Exec(
 		`INSERT INTO product_tests (
-			id, product_name, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
+			id, product_name, product_image_url, ad_url, shop_url, landing_url, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
 			gross_margin_pct, beroas, shipping_cost_eur, shipping_days, status, kill_reason, score, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		pt.ID, pt.ProductName, pt.Niche, pt.ShopifyStore, pt.SourcePlatform, pt.Supplier, pt.COGSEur, pt.SellPriceEur,
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			product_name = excluded.product_name,
+			product_image_url = excluded.product_image_url,
+			ad_url = excluded.ad_url,
+			shop_url = excluded.shop_url,
+			landing_url = excluded.landing_url,
+			niche = excluded.niche,
+			shopify_store = excluded.shopify_store,
+			source_platform = excluded.source_platform,
+			supplier = excluded.supplier,
+			cogs_eur = excluded.cogs_eur,
+			sell_price_eur = excluded.sell_price_eur,
+			gross_margin_pct = excluded.gross_margin_pct,
+			beroas = excluded.beroas,
+			shipping_cost_eur = excluded.shipping_cost_eur,
+			shipping_days = excluded.shipping_days,
+			status = excluded.status,
+			kill_reason = excluded.kill_reason,
+			score = excluded.score,
+			updated_at = excluded.updated_at`,
+		pt.ID, pt.ProductName, pt.ProductImageURL, pt.AdURL, pt.ShopURL, pt.LandingURL, pt.Niche, pt.ShopifyStore, pt.SourcePlatform, pt.Supplier, pt.COGSEur, pt.SellPriceEur,
 		pt.GrossMarginPct, pt.BEROAS, pt.ShippingCostEur, pt.ShippingDays, pt.Status, pt.KillReason, pt.Score, pt.CreatedAt, pt.UpdatedAt,
 	)
 	return err
@@ -133,7 +166,7 @@ func (s *Store) UpdateProductStatus(id string, status string, killReason string)
 
 func (s *Store) GetProductTest(id string) (*ProductTest, error) {
 	row := s.db.QueryRow(
-		`SELECT id, product_name, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
+		`SELECT id, product_name, product_image_url, ad_url, shop_url, landing_url, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
 		        gross_margin_pct, beroas, shipping_cost_eur, shipping_days, status, kill_reason, score, created_at, updated_at
 		   FROM product_tests WHERE id = ?`,
 		id,
@@ -141,7 +174,7 @@ func (s *Store) GetProductTest(id string) (*ProductTest, error) {
 
 	pt := ProductTest{}
 	err := row.Scan(
-		&pt.ID, &pt.ProductName, &pt.Niche, &pt.ShopifyStore, &pt.SourcePlatform, &pt.Supplier, &pt.COGSEur, &pt.SellPriceEur,
+		&pt.ID, &pt.ProductName, &pt.ProductImageURL, &pt.AdURL, &pt.ShopURL, &pt.LandingURL, &pt.Niche, &pt.ShopifyStore, &pt.SourcePlatform, &pt.Supplier, &pt.COGSEur, &pt.SellPriceEur,
 		&pt.GrossMarginPct, &pt.BEROAS, &pt.ShippingCostEur, &pt.ShippingDays, &pt.Status, &pt.KillReason, &pt.Score, &pt.CreatedAt, &pt.UpdatedAt,
 	)
 	if err == sql.ErrNoRows {
@@ -154,19 +187,19 @@ func (s *Store) GetProductTest(id string) (*ProductTest, error) {
 }
 
 func (s *Store) GetProductsByStatus(status string) ([]ProductTest, error) {
-	return s.getProducts(`SELECT id, product_name, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
+	return s.getProducts(`SELECT id, product_name, product_image_url, ad_url, shop_url, landing_url, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
 		gross_margin_pct, beroas, shipping_cost_eur, shipping_days, status, kill_reason, score, created_at, updated_at
 		FROM product_tests WHERE status = ? ORDER BY updated_at DESC`, status)
 }
 
 func (s *Store) GetProductsByNiche(niche string) ([]ProductTest, error) {
-	return s.getProducts(`SELECT id, product_name, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
+	return s.getProducts(`SELECT id, product_name, product_image_url, ad_url, shop_url, landing_url, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
 		gross_margin_pct, beroas, shipping_cost_eur, shipping_days, status, kill_reason, score, created_at, updated_at
 		FROM product_tests WHERE niche = ? ORDER BY updated_at DESC`, niche)
 }
 
 func (s *Store) GetAllProducts() ([]ProductTest, error) {
-	return s.getProducts(`SELECT id, product_name, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
+	return s.getProducts(`SELECT id, product_name, product_image_url, ad_url, shop_url, landing_url, niche, shopify_store, source_platform, supplier, cogs_eur, sell_price_eur,
 		gross_margin_pct, beroas, shipping_cost_eur, shipping_days, status, kill_reason, score, created_at, updated_at
 		FROM product_tests ORDER BY updated_at DESC`)
 }
@@ -377,7 +410,7 @@ func (s *Store) getProducts(query string, args ...any) ([]ProductTest, error) {
 	for rows.Next() {
 		var pt ProductTest
 		if err := rows.Scan(
-			&pt.ID, &pt.ProductName, &pt.Niche, &pt.ShopifyStore, &pt.SourcePlatform, &pt.Supplier, &pt.COGSEur, &pt.SellPriceEur,
+			&pt.ID, &pt.ProductName, &pt.ProductImageURL, &pt.AdURL, &pt.ShopURL, &pt.LandingURL, &pt.Niche, &pt.ShopifyStore, &pt.SourcePlatform, &pt.Supplier, &pt.COGSEur, &pt.SellPriceEur,
 			&pt.GrossMarginPct, &pt.BEROAS, &pt.ShippingCostEur, &pt.ShippingDays, &pt.Status, &pt.KillReason, &pt.Score, &pt.CreatedAt, &pt.UpdatedAt,
 		); err != nil {
 			return nil, err

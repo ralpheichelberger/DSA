@@ -72,11 +72,11 @@ func (a *Agent) ApprovalChan() chan<- ApprovalResponse { return a.approval }
 func (a *Agent) Approvals() <-chan ApprovalResponse { return a.approval }
 
 func (a *Agent) Run(ctx context.Context) {
-	_ = a.runCycle(ctx)
 	interval := time.Duration(a.cfg.AgentIntervalHours) * time.Hour
 	if interval <= 0 {
 		interval = 6 * time.Hour
 	}
+	a.logger.Info("agent scheduler started", zap.Duration("interval_until_first_cycle", interval))
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
@@ -142,9 +142,21 @@ func (a *Agent) runCycle(ctx context.Context) error {
 	return err6
 }
 
+// shopifyStoreFromDiscoveryNiche maps the discovery bucket to launch routing (pets vs tech Shopify domain).
+func shopifyStoreFromDiscoveryNiche(niche string) string {
+	if strings.EqualFold(strings.TrimSpace(niche), "pets") {
+		return "pets"
+	}
+	return "tech"
+}
+
 func (a *Agent) runDiscovery(ctx context.Context) ([]store.ProductTest, error) {
 	var viable []store.ProductTest
-	for _, niche := range []string{"tech", "pets"} {
+	niches := a.cfg.DiscoveryNiches
+	if len(niches) == 0 {
+		niches = []string{"tech", "pets"}
+	}
+	for _, niche := range niches {
 		candidates, err := a.discoverer.GetTrendingProducts(ctx, niche, "US", 10)
 		if err != nil {
 			a.logger.Warn("discover failed for niche", zap.String("niche", niche), zap.Error(err))
@@ -174,14 +186,17 @@ func (a *Agent) runDiscovery(ctx context.Context) ([]store.ProductTest, error) {
 					WeeklyGrowthPct:   25,
 				},
 			})
-			if scoreRes.Score < 60 {
-				continue
-			}
+			isViable := scoreRes.Score >= 60
 			pt := store.ProductTest{
 				ID:              c.ID,
 				ProductName:     c.Name,
-				Niche:           c.Niche,
-				ShopifyStore:    c.ShopifyStore,
+				ProductImageURL: c.ImageURL,
+				AdURL:           c.AdURL,
+				ShopURL:         c.ShopURL,
+				LandingURL:      c.LandingURL,
+				// Stamp the discovery query niche, not Minea's payload (ads often have missing/wrong category).
+				Niche:           niche,
+				ShopifyStore:    shopifyStoreFromDiscoveryNiche(niche),
 				SourcePlatform:  "minea",
 				Supplier:        c.SupplierID,
 				COGSEur:         cost.COGSEur,
@@ -199,7 +214,9 @@ func (a *Agent) runDiscovery(ctx context.Context) ([]store.ProductTest, error) {
 				a.logger.Warn("save candidate failed", zap.String("product_id", c.ID), zap.Error(err))
 				continue
 			}
-			viable = append(viable, pt)
+			if isViable {
+				viable = append(viable, pt)
+			}
 		}
 	}
 	return viable, nil

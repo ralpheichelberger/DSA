@@ -32,6 +32,9 @@ type Config struct {
 	AutoApprove          bool
 	Port                 string
 	DevMode              bool
+	// DiscoveryNiches controls which Minea niches the agent pulls each cycle (trending / radar).
+	// Set AGENT_DISCOVERY_NICHES to a comma list, e.g. "pets" or "tech,pets". Default: tech,pets.
+	DiscoveryNiches []string
 }
 
 func Load() (*Config, error) {
@@ -60,9 +63,34 @@ func Load() (*Config, error) {
 		DevMode:              getEnvAsBool("DEV_MODE", true),
 		AutoApprove:          getEnvAsBool("AUTO_APPROVE", false),
 		AgentIntervalHours:   getEnvAsInt("AGENT_INTERVAL_HOURS", 6),
+		DiscoveryNiches:      discoveryNichesFromEnv(),
 	}
 
 	return cfg, nil
+}
+
+func discoveryNichesFromEnv() []string {
+	const defaultCSV = "tech,pets"
+	raw := strings.TrimSpace(os.Getenv("AGENT_DISCOVERY_NICHES"))
+	if raw == "" {
+		raw = defaultCSV
+	}
+	var out []string
+	for _, p := range strings.Split(raw, ",") {
+		p = strings.ToLower(strings.TrimSpace(p))
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	if len(out) == 0 {
+		for _, p := range strings.Split(defaultCSV, ",") {
+			p = strings.TrimSpace(p)
+			if p != "" {
+				out = append(out, p)
+			}
+		}
+	}
+	return out
 }
 
 func (c *Config) Validate() error {

@@ -1,4 +1,7 @@
 .env
+# DevTools HAR / saved network logs (cookies, JWTs, Cognito tokens)
+*.har
+log version*
 bin/
 data/
 *.db
