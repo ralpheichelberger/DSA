@@ -306,3 +306,13 @@ func TestManyPlayers(t *testing.T) {
 	}
 	t.Logf("200 players answered and got the reveal in %v", time.Since(start))
 }
+
+func TestClientIP(t *testing.T) {
+	s := &Server{cfg: Config{TrustProxy: true}}
+	r := httptest.NewRequest("GET", "/", nil)
+	r.RemoteAddr = "10.0.0.5:1234"
+	r.Header.Set("X-Forwarded-For", "1.1.1.1, 203.0.113.9")
+	assert.Equal(t, "203.0.113.9", s.clientIP(r), "a client-supplied first entry is ignored")
+	s.cfg.TrustProxy = false
+	assert.Equal(t, "10.0.0.5", s.clientIP(r))
+}

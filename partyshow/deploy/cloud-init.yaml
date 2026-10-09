@@ -1,0 +1,95 @@
+#cloud-config
+# Rendered by .github/workflows/partyshow-deploy.yml when the server is first created.
+# Placeholders (double underscores around a capitalized name) are filled in by the workflow.
+#
+# The server needs no SSH access: it pulls the branch every 5 minutes and
+# rebuilds when something changed, and backs up the saved shows every night.
+package_update: true
+packages: [docker.io, docker-compose-v2, git, curl]
+
+write_files:
+  - path: /opt/partyshow/env
+    permissions: "0600"
+    content: |
+      OPENAI_API_KEY=__OPENAI_API_KEY__
+      DEFAULT_PLAN=__DEFAULT_PLAN__
+      TRUST_PROXY=true
+      GENERATIONS_PER_HOUR=5
+      GENERATIONS_PER_DAY=200
+      RETENTION_DAYS=60
+
+  - path: /usr/local/bin/partyshow-update
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      # Deploys the latest commit of the branch if it changed (or always with --force).
+      set -euo pipefail
+      cd /opt/partyshow/repo
+      git fetch -q origin __BRANCH__
+      if [ "${1:-}" = "--force" ] || [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/__BRANCH__)" ]; then
+        git reset -q --hard origin/__BRANCH__
+        cp /opt/partyshow/env partyshow/deploy/.env
+        cd partyshow/deploy
+        docker compose up -d --build --remove-orphans
+        docker image prune -f >/dev/null
+        echo "deployed $(git rev-parse --short HEAD)"
+      fi
+
+  - path: /usr/local/bin/partyshow-backup
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      # Nightly copy of the saved shows; keeps 14 days.
+      set -euo pipefail
+      mkdir -p /var/backups/partyshow
+      docker run --rm -v partyshow_data:/data:ro -v /var/backups/partyshow:/b alpine \
+        tar czf "/b/shows-$(date +%F).tgz" -C /data .
+      find /var/backups/partyshow -name 'shows-*.tgz' -mtime +14 -delete
+
+  - path: /etc/systemd/system/partyshow-update.service
+    content: |
+      [Unit]
+      Description=Deploy latest PartyShow
+      After=docker.service network-online.target
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/partyshow-update
+  - path: /etc/systemd/system/partyshow-update.timer
+    content: |
+      [Unit]
+      Description=Check for PartyShow updates every 5 minutes
+      [Timer]
+      OnBootSec=2min
+      OnUnitActiveSec=5min
+      [Install]
+      WantedBy=timers.target
+  - path: /etc/systemd/system/partyshow-backup.service
+    content: |
+      [Unit]
+      Description=Back up PartyShow data
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/partyshow-backup
+  - path: /etc/systemd/system/partyshow-backup.timer
+    content: |
+      [Unit]
+      Description=Nightly PartyShow backup
+      [Timer]
+      OnCalendar=*-*-* 03:30:00
+      Persistent=true
+      [Install]
+      WantedBy=timers.target
+
+runcmd:
+  - systemctl enable --now docker
+  - |
+    IP=$(curl -fsS http://169.254.169.254/hetzner/v1/metadata/public-ipv4)
+    DOMAIN="__DOMAIN__"
+    # Without an own domain yet, use a free hostname that points to this IP.
+    if [ -z "$DOMAIN" ]; then DOMAIN="$(echo "$IP" | tr . -).sslip.io"; fi
+    echo "DOMAIN=$DOMAIN" >> /opt/partyshow/env
+    echo "BASE_URL=https://$DOMAIN" >> /opt/partyshow/env
+  - git clone -q -b __BRANCH__ https://github.com/__REPO__.git /opt/partyshow/repo
+  - systemctl daemon-reload
+  - systemctl enable --now partyshow-update.timer partyshow-backup.timer
+  - /usr/local/bin/partyshow-update --force

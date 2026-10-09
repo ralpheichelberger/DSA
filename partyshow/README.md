@@ -37,20 +37,23 @@ go test ./...                # all tests (go test -short ./... skips the 200-pho
 
 Settings are environment variables, listed at the top of `cmd/server/main.go`.
 
-## Deploy (one Hetzner Cloud server)
+## Deploy (Hetzner Cloud, automatic)
 
-1. Create a server (Ubuntu, CX22 is enough to start) and install Docker.
-2. Point the domain's A record at the server. With Cloudflare in front, set SSL/TLS mode to "Full".
-3. Copy this folder to the server and create `deploy/.env`:
-   ```
-   BASE_URL=https://example.com
-   OPENAI_API_KEY=sk-...
-   TRUST_PROXY=true
-   GENERATIONS_PER_DAY=200
-   ```
-4. Start it with `cd deploy && DOMAIN=example.com docker compose up -d --build`. Caddy gets the HTTPS certificate automatically.
+The GitHub workflow `.github/workflows/partyshow-deploy.yml` runs the tests and a Docker smoke test on every push. When the repository secret `HCLOUD_TOKEN` is set, it also creates the server once. The server is the cheapest shared type in Nuremberg, Falkenstein or Helsinki, with Ubuntu 24.04, a firewall allowing only ports 80/443, and Hetzner backups.
 
-Shows are stored as JSON files in the `data` volume. Running games live only in memory, so a restart ends running games but not saved shows.
+From then on the server deploys by itself (`deploy/cloud-init.yaml`): every 5 minutes it checks the branch and rebuilds when something changed. Every night it backs up the saved shows to `/var/backups/partyshow` and keeps 14 days. Neither GitHub nor anyone else needs SSH access.
+
+Repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Purpose |
+|---|---|
+| `HCLOUD_TOKEN` | Hetzner Cloud API token (Read & Write). Required for creating the server. |
+| `OPENAI_API_KEY` | Optional. Without it, the app uses the demo generator. |
+| `PARTYSHOW_DOMAIN` | Optional. Without it, the app runs at `https://<ip-with-dashes>.sslip.io` |
+
+The secrets are written into the server once, at creation. To change them later, delete the server in the Hetzner console and run the workflow again. Saved shows are lost unless restored from a backup.
+
+To run it by hand on any Linux server with Docker: write `deploy/.env` (`DOMAIN`, `BASE_URL`, `OPENAI_API_KEY`, `TRUST_PROXY=true`), then `cd deploy && docker compose up -d --build`.
 
 ## Code layout
 

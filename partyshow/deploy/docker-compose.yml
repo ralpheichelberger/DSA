@@ -1,10 +1,13 @@
 # Production setup on one Hetzner Cloud server: Caddy (automatic HTTPS) in front of PartyShow.
-# Usage on the server:  DOMAIN=example.com docker compose up -d --build
+# Usage on the server: put DOMAIN, BASE_URL, OPENAI_API_KEY ... into deploy/.env, then
+#   docker compose up -d --build
+# (cloud-init.yaml does this automatically on a new Hetzner server.)
+name: partyshow
 services:
   app:
     build: ..
     restart: unless-stopped
-    env_file: .env # OPENAI_API_KEY, BASE_URL=https://$DOMAIN, TRUST_PROXY=true, ...
+    env_file: .env
     volumes:
       - data:/data
   caddy:

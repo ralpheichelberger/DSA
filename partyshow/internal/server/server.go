@@ -36,7 +36,7 @@ type Config struct {
 	DefaultPlan        show.Plan // plan for new shows until payments exist
 	GenerationsPerHour int       // per client IP
 	GenerationsPerDay  int       // total
-	TrustProxy         bool      // read client IP from X-Forwarded-For (behind Cloudflare/Caddy)
+	TrustProxy         bool      // read client IP from X-Forwarded-For (behind Caddy)
 	MaxSiteChars       int
 }
 
@@ -174,11 +174,11 @@ func writeErr(w http.ResponseWriter, status int, msg string) {
 
 func (s *Server) clientIP(r *http.Request) string {
 	if s.cfg.TrustProxy {
-		if ip := r.Header.Get("CF-Connecting-IP"); ip != "" {
-			return ip
-		}
+		// The last entry is the one our own proxy (Caddy) added; earlier entries
+		// come from the client and could be faked to dodge the rate limit.
 		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-			return strings.TrimSpace(strings.Split(xff, ",")[0])
+			parts := strings.Split(xff, ",")
+			return strings.TrimSpace(parts[len(parts)-1])
 		}
 	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
