@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Show bearbeiten – PartyShow</title>
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="wrap" style="max-width:900px">
+  <div class="top row">
+    <a class="logo" href="/">Party<span>Show</span></a>
+    <span class="spacer"></span>
+    <a href="#" class="lang-switch" data-lang-link>English</a>
+  </div>
+
+  <p class="error" id="load-error"></p>
+  <div id="editor" class="hidden">
+    <div class="notice" style="margin-bottom:18px">
+      <b data-i18n="e_link_t">Speichert diesen Link!</b>
+      <span data-i18n="e_link_d">Er ist euer Zugang zur Show – ohne ihn kann niemand (auch wir nicht) sie wiederfinden.</span>
+      <div class="row" style="margin-top:8px"><button class="btn small secondary" id="copy-link" data-i18n="e_copy">Link kopieren</button><span class="muted small" id="copied"></span></div>
+    </div>
+    <p class="notice hidden" id="site-warning" data-i18n="e_site_warn">Hinweis: Eure Webseite konnte nicht gelesen werden. Die Fragen basieren nur auf euren Fakten.</p>
+
+    <label for="title" data-i18n="e_title">Titel der Show</label>
+    <input type="text" id="title" maxlength="120">
+    <label for="welcome" data-i18n="e_welcome">Begrüßung (spricht die Moderatorenstimme)</label>
+    <textarea id="welcome" rows="2" style="min-height:70px"></textarea>
+
+    <div id="rounds"></div>
+    <button class="btn secondary small" id="add-round" data-i18n="e_add_round">+ Runde hinzufügen</button>
+
+    <label for="outro" data-i18n="e_outro">Abschluss</label>
+    <textarea id="outro" rows="2" style="min-height:70px"></textarea>
+
+    <p class="muted small" style="margin-top:18px"><span data-i18n="e_plan">Eure Show ist für bis zu</span> <b id="max-players"></b> <span data-i18n="e_players">Mitspieler freigeschaltet.</span></p>
+
+    <div class="sticky-bar">
+      <div class="row">
+        <button class="btn" id="save" data-i18n="e_save">Speichern</button>
+        <button class="btn secondary" id="host" data-i18n="e_host">Show starten (Beamer)</button>
+        <span class="muted" id="status"></span>
+        <span class="error" id="error"></span>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/edit.js"></script>
+</body>
+</html>

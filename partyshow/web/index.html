@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PartyShow – eure Weihnachtsfeier als Spielshow</title>
+<meta name="description" content="Eure Firma als TV-Spielshow: Webseite und ein paar Insider-Fakten eingeben, in 10 Minuten fertig. Alle spielen mit dem Handy.">
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top row">
+    <a class="logo" href="/">Party<span>Show</span></a>
+    <span class="spacer"></span>
+    <a href="#" class="lang-switch" data-lang-link>English</a>
+  </div>
+
+  <div class="hero">
+    <h1 data-i18n="hero_title">Eure Weihnachtsfeier als TV-Spielshow.</h1>
+    <p class="lead" data-i18n="hero_lead">Über eure Firma, eure Insider, euer Jahr. In 10 Minuten fertig – kein Moderator, keine Vorbereitung. Alle spielen mit dem eigenen Handy.</p>
+    <div class="row" style="margin-top:24px">
+      <a class="btn" href="/create" id="cta" data-i18n="cta_create">Show erstellen</a>
+      <button class="btn secondary" id="demo" data-i18n="cta_demo">Demo ansehen</button>
+    </div>
+    <p class="muted small" data-i18n="hero_free">Kostenlos testen mit bis zu 15 Mitspielern.</p>
+    <p class="error" id="demo-error"></p>
+  </div>
+
+  <section>
+    <div class="steps">
+      <div class="card"><h3 data-i18n="s1_t">1. Eingeben</h3><p data-i18n="s1_d">Eure Webseite und 10–20 Insider-Fakten: „Thomas bringt immer Kuchen“, „Wir sind im März umgezogen“.</p></div>
+      <div class="card"><h3 data-i18n="s2_t">2. Prüfen</h3><p data-i18n="s2_d">Die KI schreibt 5 Runden mit rund 20 Fragen. Ihr könnt jede Frage ändern oder löschen.</p></div>
+      <div class="card"><h3 data-i18n="s3_t">3. Spielen</h3><p data-i18n="s3_d">Show auf Beamer oder TV starten, QR-Code scannen, los geht's. Mit Moderatorenstimme, Timer und Live-Rangliste.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-i18n="cmp_t">Warum nicht einfach Kahoot oder ein Moderator?</h2>
+    <div style="overflow-x:auto"><table class="compare">
+      <tr><th></th><th>PartyShow</th><th data-i18n="cmp_diy">Quiz-Tools (selbst schreiben)</th><th data-i18n="cmp_agency">Moderator / Agentur</th></tr>
+      <tr><td data-i18n="cmp_r1">Fragen über eure Firma</td><td data-i18n="cmp_auto">automatisch</td><td data-i18n="cmp_self">selbst schreiben (Stunden)</td><td data-i18n="cmp_briefing">nach Briefing</td></tr>
+      <tr><td data-i18n="cmp_r2">Vorbereitung</td><td data-i18n="cmp_10">10 Minuten</td><td data-i18n="cmp_hours">mehrere Stunden</td><td data-i18n="cmp_weeks">Buchung, Termine</td></tr>
+      <tr><td data-i18n="cmp_r3">Preis</td><td data-i18n="cmp_p1">ab 149 €</td><td data-i18n="cmp_p2">günstig, aber eure Zeit</td><td data-i18n="cmp_p3">ca. 200–1.200 € oder pro Person</td></tr>
+    </table></div>
+  </section>
+
+  <section>
+    <h2 data-i18n="price_t">Preise</h2>
+    <div class="price-grid">
+      <div class="card"><h3 data-i18n="pl_free">Test</h3><div class="price" data-i18n="pl_free_p">0 €</div><p data-i18n="pl_free_d">bis 15 Mitspieler</p></div>
+      <div class="card"><h3 data-i18n="pl_small">Team</h3><div class="price">149 €</div><p data-i18n="pl_small_d">bis 50 Mitspieler</p></div>
+      <div class="card"><h3 data-i18n="pl_medium">Firma</h3><div class="price">249 €</div><p data-i18n="pl_medium_d">bis 200 Mitspieler</p></div>
+      <div class="card"><h3 data-i18n="pl_large">Groß</h3><div class="price">399 €</div><p data-i18n="pl_large_d">bis 500 Mitspieler</p></div>
+    </div>
+    <p class="muted small" data-i18n="price_note">Einmalzahlung pro Show, keine Abos. Preise inkl. aller Fragen, Moderatorenstimme und Live-Rangliste.</p>
+  </section>
+
+  <section>
+    <h2 data-i18n="faq_t">Häufige Fragen</h2>
+    <h3 data-i18n="faq1_q">Brauchen wir eine App?</h3>
+    <p data-i18n="faq1_a">Nein. Mitspieler scannen den QR-Code mit dem Handy und spielen im Browser.</p>
+    <h3 data-i18n="faq2_q">Kann etwas Peinliches über Kollegen drankommen?</h3>
+    <p data-i18n="faq2_a">Der Sicherheitsmodus ist standardmäßig an und filtert heikle Themen wie Alter, Gewicht, Gehalt oder Alkohol. Außerdem prüft ihr jede Frage vor der Feier.</p>
+    <h3 data-i18n="faq3_q">Was brauchen wir vor Ort?</h3>
+    <p data-i18n="faq3_a">Einen Laptop am Beamer oder TV, Internet und Lautsprecher für die Moderatorenstimme.</p>
+    <h3 data-i18n="faq4_q">Was passiert mit unseren Daten?</h3>
+    <p data-i18n="faq4_a">Server in der EU. Wir speichern nur, was die Show braucht, und löschen alles automatisch nach 60 Tagen.</p>
+  </section>
+
+  <footer class="row">
+    <span>© PartyShow</span><span class="spacer"></span>
+    <a href="/impressum" data-i18n="footer_imprint">Impressum</a>
+    <a href="/datenschutz" data-i18n="footer_privacy">Datenschutz</a>
+  </footer>
+</div>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/landing.js"></script>
+</body>
+</html>

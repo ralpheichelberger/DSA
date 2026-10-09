@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PartyShow</title>
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="screen">
+<div class="start-overlay" id="overlay">
+  <div class="logo" style="font-size:2.4rem">Party<span>Show</span></div>
+  <p class="muted" id="overlay-text" data-i18n="h_overlay">Laptop an Beamer oder TV anschließen, Lautsprecher an – dann starten.</p>
+  <label class="check" style="font-weight:600"><input type="checkbox" id="voice-on" checked> <span data-i18n="h_voice">Moderatorenstimme</span></label>
+  <button class="btn" id="start" data-i18n="h_start">Vollbild & los</button>
+  <p class="error" id="fatal"></p>
+</div>
+
+<div class="stage">
+  <div class="stage-top">
+    <span id="top-left"></span>
+    <span class="spacer"></span>
+    <span id="top-right"></span>
+  </div>
+  <div class="stage-main" id="main"></div>
+  <div class="stage-bottom">
+    <span class="muted small" id="conn"></span>
+    <span class="spacer"></span>
+    <button class="btn small secondary" id="voice-toggle"></button>
+    <button class="btn small secondary" id="restart" data-i18n="h_restart">Neu starten</button>
+    <button class="btn" id="next" data-i18n="h_next">Weiter ▸</button>
+  </div>
+</div>
+<div class="brand"><span data-i18n="brand_made">Erstellt mit</span> <b>PartyShow</b></div>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/host.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Show erstellen – PartyShow</title>
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<div class="wrap" style="max-width:760px">
+  <div class="top row">
+    <a class="logo" href="/">Party<span>Show</span></a>
+    <span class="spacer"></span>
+    <a href="#" class="lang-switch" data-lang-link>English</a>
+  </div>
+
+  <h1 data-i18n="c_title">Eure Show erstellen</h1>
+  <p class="muted" data-i18n="c_lead">Je mehr Insider-Fakten, desto persönlicher die Show. Dauert ca. 1 Minute.</p>
+
+  <form id="form" class="card" novalidate>
+    <label for="company" data-i18n="c_company">Firmenname</label>
+    <input type="text" id="company" required maxlength="100" data-i18n-ph="c_company_ph" placeholder="z. B. Musterfirma GmbH">
+
+    <label for="website" data-i18n="c_website">Webseite (optional)</label>
+    <input type="url" id="website" maxlength="300" placeholder="https://www.musterfirma.de">
+    <p class="muted small" data-i18n="c_website_hint">Wir lesen nur die Startseite, um Fragen über eure Firma zu stellen.</p>
+
+    <label for="occasion" data-i18n="c_occasion">Anlass</label>
+    <select id="occasion">
+      <option value="christmas" data-i18n="o_christmas">Weihnachtsfeier</option>
+      <option value="teamevent" data-i18n="o_teamevent">Teamevent / Sommerfest</option>
+      <option value="farewell" data-i18n="o_farewell">Abschied / Ruhestand</option>
+      <option value="birthday" data-i18n="o_birthday">Geburtstag</option>
+      <option value="wedding" data-i18n="o_wedding">Hochzeit</option>
+    </select>
+
+    <label for="facts" data-i18n="c_facts">Insider-Fakten – eine pro Zeile</label>
+    <textarea id="facts" rows="8" data-i18n-ph="c_facts_ph" placeholder="Thomas bringt jeden Montag Kuchen mit&#10;Die Kaffeemaschine ist viermal kaputt gegangen&#10;Im März sind wir ins neue Büro gezogen&#10;Unser größter Kunde ist eine Bäckerei"></textarea>
+    <p class="muted small" data-i18n="c_facts_hint">Nur nette Dinge, die alle wissen dürfen. Keine Gesundheit, kein Gehalt, nichts Peinliches.</p>
+
+    <label for="teams" data-i18n="c_teams">Teams oder Abteilungen (optional, durch Komma getrennt)</label>
+    <input type="text" id="teams" maxlength="400" data-i18n-ph="c_teams_ph" placeholder="Vertrieb, Technik, Buchhaltung">
+
+    <label for="language" data-i18n="c_language">Sprache der Show</label>
+    <select id="language">
+      <option value="de">Deutsch</option>
+      <option value="en">English</option>
+    </select>
+
+    <label class="check"><input type="checkbox" id="safe" checked> <span data-i18n="c_safe">Sicherheitsmodus: keine Fragen zu Alter, Gewicht, Gehalt, Alkohol, Beziehungen, Religion oder Politik</span></label>
+    <label class="check"><input type="checkbox" id="consent" required> <span><span data-i18n="c_consent">Ich habe die</span> <a href="/datenschutz" target="_blank" data-i18n="footer_privacy">Datenschutzhinweise</a> <span data-i18n="c_consent2">gelesen und gebe nur Informationen ein, die ich weitergeben darf.</span></span></label>
+
+    <p class="error" id="error"></p>
+    <div class="row" style="margin-top:18px">
+      <button class="btn" type="submit" id="submit" data-i18n="c_submit">Show generieren</button>
+      <span class="muted hidden" id="working" data-i18n="c_working">Die KI schreibt eure Show … das dauert bis zu einer Minute.</span>
+    </div>
+  </form>
+  <footer class="row">
+    <span class="spacer"></span>
+    <a href="/impressum" data-i18n="footer_imprint">Impressum</a>
+    <a href="/datenschutz" data-i18n="footer_privacy">Datenschutz</a>
+  </footer>
+</div>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/create.js"></script>
+</body>
+</html>
